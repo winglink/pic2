@@ -12,7 +12,7 @@ using namespace  cv;
 const double PI = std::atan(1.0) * 4;
 class Tx{
 public:
-    virtual void show(Mat &mat,const Point &center,const Scalar &scalar) = 0;
+    virtual void show(Mat &mat, const Point &center, const Scalar &scalar) = 0;
     virtual void show_py(Mat &mat,const Point &center,const Scalar &scalar) = 0;
 
 protected:
@@ -272,5 +272,106 @@ public:
 private:
     int r = 30;
     int R = 65;
+};
+class F_base{
+public:
+    F_base() {}
+    virtual Mat bh(Mat &mat) = 0;
+};
+class Fs : public F_base{
+public:
+    Fs() {}
+    Fs(int angle, double scale) : angle(angle), scale(scale) {}
+    Mat bh(Mat &mat) override {  //旋转 缩放
+        Mat result;
+        Point2f center(mat.cols / 2,mat.rows / 2);
+        Mat m = getRotationMatrix2D(center,angle,scale);
+        warpAffine(mat,result,m,Size(mat.cols,mat.rows));
+
+        mat = result;
+        return m;
+    }
+private:
+    int angle = 45;
+    double scale = 0.5;
+};
+class Py : public F_base{  //平移
+public:
+    Py() {}
+    Py(int px, int py) : px(px), py(py) {}
+
+    Mat bh(Mat &mat) override {
+        Mat m = (Mat_<float>(2,3) << 1,0,px,0,1,py );
+        Mat result;
+        warpAffine(mat,result,m,Size(mat.cols,mat.rows));
+        mat = result;
+        return mat;
+    }
+private:
+    int px = 20;
+    int py = 20;
+};
+class Sf : public F_base{ //缩放
+public:
+    Sf() {}
+    Sf(double fx, double fy) : fx(fx), fy(fy) {}
+
+    Mat bh(Mat &mat) override {
+        Mat m = (Mat_<float>(2,3) << fx,0,0,0,fy,0 );
+        Mat result;
+        warpAffine(mat,result,m,Size(mat.cols,mat.rows));
+        mat = result;
+        return mat;
+    }
+
+private:
+    double  fx = 1.5;
+    double  fy = 1.5;
+};
+class Jx : public F_base{ //y轴镜像
+public:
+    Jx() {}
+    Mat bh(Mat &mat) override {
+        Point2f srcPoints2[3];
+        Point2f dstPoints2[3];
+
+        srcPoints2[0] = Point2i(0, 0);
+        srcPoints2[1] = Point2i(0, mat.rows);
+        srcPoints2[2] = Point2i(mat.cols, 0);
+
+        dstPoints2[0] = Point2i(mat.cols, 0);
+        dstPoints2[1] = Point2i(mat.cols, mat.rows);
+        dstPoints2[2] = Point2i(0, 0);
+        Mat result;
+        Mat m = getAffineTransform(srcPoints2, dstPoints2);
+        warpAffine(mat, result, m, Size(mat.cols,mat.rows));
+
+        mat = result;
+        return m;
+    }
+};
+
+class Jy : public F_base { //x轴镜像
+public:
+    Jy() {}
+
+    Mat bh(Mat &mat) override {
+        Point2f srcPoints2[3];
+        Point2f dstPoints2[3];
+
+        srcPoints2[0] = Point2i(0, 0);
+        srcPoints2[1] = Point2i(0, mat.rows);
+        srcPoints2[2] = Point2i(mat.cols, 0);
+
+        dstPoints2[0] = Point2i(mat.rows, 0);
+        dstPoints2[1] = Point2i(0, 0);
+        dstPoints2[2] = Point2i(mat.rows, mat.cols);
+        Mat result;
+        Mat m = getAffineTransform(srcPoints2, dstPoints2);
+        warpAffine(mat, result, m, Size(mat.cols, mat.rows));
+
+        mat = result;
+        return m;
+    }
 };
 #endif //PIC2_SHOWPIC_H
