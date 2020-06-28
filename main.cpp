@@ -2,6 +2,7 @@
 #include "showpic.h"
 #include <string>
 #include <set>
+#include <fstream>
 void print_sj(const std::vector<Tx*> &tx,const Point *pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
 int  output_sj(int low,int up){
     srand((unsigned )time(NULL));
@@ -10,10 +11,20 @@ int  output_sj(int low,int up){
 }
 Mat fsbh(Mat &mat,const std::vector<F_base*> &fbase){
         int index = output_sj(0,fbase.size() -1 );
-        return fbase[index] -> bh(mat);
+        Mat result = fbase[index] -> bh(mat);
+        return result;
 
 }
+void  gaussnoise(Mat &mat){
+    Mat noise = Mat::zeros(mat.rows,mat.cols,mat.type());
+    RNG rng;
+    rng.fill(noise,RNG::NORMAL,15,5);
+    mat = mat + noise;
+//    std::cout << noise <<std::endl;
+}
 int main() {
+
+
     std::vector<Tx*> tx;
 //    Mat  pic = Mat(300,300,CV_8UC1,Scalar(0));
     tx.push_back(new Square);
@@ -56,22 +67,34 @@ int main() {
 }
 
 void print_sj(const std::vector<Tx*> &tx,const Point *pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase){
+    std::ofstream  outfile;
+    outfile.open("out_1.txt");
+    Bq bq;
+
     int index(0);
     int init(0);
     std::set<int> counter;
-    for(int n = 0;n < 50;n++) {
+    for(int n = 0;n < 1;n++) {
         Mat  pic = Mat(300,300,CV_8UC1,Scalar(0));
+        bq.bq["nb"].push_back(n + 1);  //标签：number
         for (int i = 4; i < 6; i++) {
 
             while (counter.find(index = output_sj(0, 6)) != counter.end()) {
             }
             tx[index]->show(pic, pp[i], scalar[init++]);
             counter.insert(index);
+            bq.bq["xh"].push_back(index+1); //标签： xh
+            bq.bq["hd"].push_back(scalar[init - 1].val[0]);
+            bq.bq["center"].push_back(pp[i].x);
+            bq.bq["center"].push_back(pp[i].y);
+
             if (index == 6) {
-                tx[7]->show(pic, pp[i], scalar[init++]);
+                index = 7;
+                tx[index]->show(pic, pp[i], scalar[init++]);
                 counter.insert(7);
             } else if (index == 4) {
-                tx[7]->show(pic, pp[i], scalar[init++]);
+                index = 7;
+                tx[index]->show(pic, pp[i], scalar[init++]);
                 counter.insert(7);
             } else {
                 int tmp = index;
@@ -80,11 +103,19 @@ void print_sj(const std::vector<Tx*> &tx,const Point *pp,const std::vector<Scala
                 tx[index]->show(pic, pp[i], scalar[init++]);
                 counter.insert(index);
             }
+            bq.bq["xh"].push_back(index+1); //标签： xh
+            bq.bq["hd"].push_back(scalar[init - 1].val[0]);
+            bq.bq["center"].push_back(pp[i].x);
+            bq.bq["center"].push_back(pp[i].y);
         }
         init = 0;
         counter.clear();
         std::string ouputname = "./zuhe/" + std::to_string(n) + ".jpg";
-        fsbh(pic,fbase);
+        Mat fs_mat = fsbh(pic,fbase);
+        bq.push_mat(fs_mat);  //标签： 仿射矩阵
+        gaussnoise(pic);  //高斯噪声
         imwrite(ouputname, pic);
+        outfile << bq;
+        bq.clearall();
     }
 }

@@ -8,6 +8,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <vector>
 #include <iostream>
+#include <unordered_map>
 using namespace  cv;
 const double PI = std::atan(1.0) * 4;
 class Tx{
@@ -284,8 +285,9 @@ public:
     Fs(int angle, double scale) : angle(angle), scale(scale) {}
     Mat bh(Mat &mat) override {  //旋转 缩放
         Mat result;
+        Mat m(2,3,CV_32FC1);
         Point2f center(mat.cols / 2,mat.rows / 2);
-        Mat m = getRotationMatrix2D(center,angle,scale);
+        m = getRotationMatrix2D(center,angle,scale);
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
 
         mat = result;
@@ -305,7 +307,7 @@ public:
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
         mat = result;
-        return mat;
+        return m;
     }
 private:
     int px = 20;
@@ -321,7 +323,7 @@ public:
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
         mat = result;
-        return mat;
+        return m;
     }
 
 private:
@@ -332,6 +334,7 @@ class Jx : public F_base{ //y轴镜像
 public:
     Jx() {}
     Mat bh(Mat &mat) override {
+        Mat m(2,3,CV_32FC1);
         Point2f srcPoints2[3];
         Point2f dstPoints2[3];
 
@@ -343,7 +346,7 @@ public:
         dstPoints2[1] = Point2i(mat.cols, mat.rows);
         dstPoints2[2] = Point2i(0, 0);
         Mat result;
-        Mat m = getAffineTransform(srcPoints2, dstPoints2);
+        m = getAffineTransform(srcPoints2, dstPoints2);
         warpAffine(mat, result, m, Size(mat.cols,mat.rows));
 
         mat = result;
@@ -356,6 +359,7 @@ public:
     Jy() {}
 
     Mat bh(Mat &mat) override {
+        Mat m(2,3,CV_32FC1);
         Point2f srcPoints2[3];
         Point2f dstPoints2[3];
 
@@ -367,11 +371,55 @@ public:
         dstPoints2[1] = Point2i(0, 0);
         dstPoints2[2] = Point2i(mat.rows, mat.cols);
         Mat result;
-        Mat m = getAffineTransform(srcPoints2, dstPoints2);
+        m = getAffineTransform(srcPoints2, dstPoints2);
         warpAffine(mat, result, m, Size(mat.cols, mat.rows));
 
         mat = result;
+//        std::cout << "***" << std::endl;
+//        std::cout << m << std::endl;
         return m;
     }
 };
+class Bq {
+public:
+    Bq() {
+        bq["nb"];//number
+        bq["xh"];//xuhao
+//        bq["fs"];//fangshe
+        bq["hd"];//huidu
+        bq["center"];//位置
+    }
+    void clearall(){
+        for(auto init : bq){
+            init.second.clear();
+        }
+        vectormat.clear();
+    }
+    void push_mat(const Mat& mat){
+        std::cout << "***" << std::endl;
+        std::cout << mat << std::endl;
+
+        Mat dst = mat.reshape(0,1);
+        vectormat = std::vector<float>(dst);
+    }
+    friend std::ostream & operator << (std::ostream &os,const Bq &b);
+
+
+    std::unordered_map<std::string,std::vector<int>> bq;
+    std::vector<float> vectormat;
+};
+
+std::ostream & operator << (std::ostream &os,Bq &b) {
+    std::vector<std::string> name({"nb","xh","hd","center"});
+    for(auto element : name){
+        for(auto item : b.bq[element]){
+            os << item <<" ";
+        }
+        os << ",";
+    }
+    for(auto item : b.vectormat)
+            os << item << " ";
+    os << std::endl;
+    return os;
+}
 #endif //PIC2_SHOWPIC_H
