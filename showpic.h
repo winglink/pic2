@@ -303,7 +303,7 @@ public:
     Py(int px, int py) : px(px), py(py) {}
 
     Mat bh(Mat &mat) override {
-        Mat m = (Mat_<float>(2,3) << 1,0,px,0,1,py );
+        Mat m = (Mat_<double>(2,3) << 1,0,px,0,1,py );
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
         mat = result;
@@ -319,7 +319,7 @@ public:
     Sf(double fx, double fy) : fx(fx), fy(fy) {}
 
     Mat bh(Mat &mat) override {
-        Mat m = (Mat_<float>(2,3) << fx,0,0,0,fy,0 );
+        Mat m = (Mat_<double>(2,3) << fx,0,0,0,fy,0 );
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
         mat = result;
@@ -390,17 +390,40 @@ public:
         bq["center"];//位置
     }
     void clearall(){
-        for(auto init : bq){
-            init.second.clear();
-        }
+        bq.clear();
         vectormat.clear();
     }
     void push_mat(const Mat& mat){
-        std::cout << "***" << std::endl;
-        std::cout << mat << std::endl;
+//        std::cout << "***" << std::endl;
+//        std::cout << mat << std::endl;
 
         Mat dst = mat.reshape(0,1);
         vectormat = std::vector<float>(dst);
+    }
+    void convert_mat(const Mat&mat){
+            std::vector<float> vectorfloat;
+            std::vector<float> re;
+        for(auto init = bq["center"].begin();init != bq["center"].end();init++){
+                    int x = *init;
+                    init++;
+                    int y = *init;
+                    Mat tmp = (Mat_<double>(3,1) << x,y,1);
+//                    std::cout << "--"<< std::endl;
+//                    std::cout << tmp<< std::endl;
+//                    std::cout << mat.type()<< std::endl;
+//                    std::cout << tmp.type()<< std::endl;
+
+                    Mat result = mat * tmp;
+//                    std::cout << "&"<< std::endl;
+
+                     Mat dst = result.reshape(0,1);
+                    vectorfloat = std::vector<float>(dst);
+                    for(auto ele : vectorfloat)
+                            re.push_back(ele);
+            }
+        bq["center"].clear();
+        for(auto ele : re)
+            bq["center"].push_back(ele);
     }
     friend std::ostream & operator << (std::ostream &os,const Bq &b);
 

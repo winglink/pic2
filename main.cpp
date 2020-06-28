@@ -12,6 +12,7 @@ int  output_sj(int low,int up){
 Mat fsbh(Mat &mat,const std::vector<F_base*> &fbase){
         int index = output_sj(0,fbase.size() -1 );
         Mat result = fbase[index] -> bh(mat);
+//        std::cout << "fangshe bh" << index << std::endl;
         return result;
 
 }
@@ -74,7 +75,7 @@ void print_sj(const std::vector<Tx*> &tx,const Point *pp,const std::vector<Scala
     int index(0);
     int init(0);
     std::set<int> counter;
-    for(int n = 0;n < 1;n++) {
+    for(int n = 0;n < 10000;n++) {
         Mat  pic = Mat(300,300,CV_8UC1,Scalar(0));
         bq.bq["nb"].push_back(n + 1);  //标签：number
         for (int i = 4; i < 6; i++) {
@@ -110,12 +111,14 @@ void print_sj(const std::vector<Tx*> &tx,const Point *pp,const std::vector<Scala
         }
         init = 0;
         counter.clear();
-        std::string ouputname = "./zuhe/" + std::to_string(n) + ".jpg";
+        std::string ouputname = "D:\\pic\\out1\\" + std::to_string(n + 1) + ".jpg"; //outpu 路径
         Mat fs_mat = fsbh(pic,fbase);
         bq.push_mat(fs_mat);  //标签： 仿射矩阵
         gaussnoise(pic);  //高斯噪声
         imwrite(ouputname, pic);
+        bq.convert_mat(fs_mat);//转换center根据仿射矩阵
         outfile << bq;
         bq.clearall();
     }
+    outfile.close();
 }
