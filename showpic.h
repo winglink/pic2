@@ -105,6 +105,7 @@ public:
         input.push_back(Point(center.x - r * sin(angle / 2),center.y + r * cos(angle / 2)));
         input.push_back(Point(center.x - r * sin(angle),center.y - r * cos(angle)));
 
+        std::cout << "---" << input[2] << std::endl;
 //        for(auto point : input){
 //            std::cout << point.x << " " << point.y << std::endl;
 //        }
@@ -298,6 +299,7 @@ public:
         }
         std::vector<std::vector<Point>> result;
         result.push_back(input2);
+        std::cout << "***" << input2[6] << std::endl;
         fillPoly(mat,result,scalar);
     }
 
@@ -370,8 +372,8 @@ public:
     Py(int px, int py) : px(px), py(py) {}
 
     Mat bh(Mat &mat) override {
-        px = output_sj(-20,20);
-        py = output_sj(-20,20);
+//        px = output_sj(-20,20);
+//        py = output_sj(-20,20);
         Mat m = (Mat_<double>(2,3) << 1,0,px,0,1,py );
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
@@ -388,8 +390,8 @@ public:
     Sf(double fx, double fy) : fx(fx), fy(fy) {}
 
     Mat bh(Mat &mat) override {
-        fx = output_sj(8,12) / 10.0;
-        fy = output_sj(8,12) / 10.0;
+//        fx = output_sj(8,12) / 10.0;
+//        fy = output_sj(8,12) / 10.0;
 
         Mat m = (Mat_<double>(2,3) << fx,0,0,0,fy,0 );
         Mat result;

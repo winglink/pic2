@@ -7,9 +7,11 @@
 const int N = 10000;
 void print_zh(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
 void print_sj(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
+void print_all(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
 
-Mat fsbh(Mat &mat,const std::vector<F_base*> &fbase){
-        int index = output_sj(0,fbase.size() -1 );
+Mat fsbh(Mat &mat,const std::vector<F_base*> &fbase,int n){
+//        int index = output_sj(0,fbase.size() -1 );
+        int index = n % (fbase.size());
         Mat result = fbase[index] -> bh(mat);
 //        std::cout << "fangshe bh" << index << std::endl;
         return result;
@@ -34,23 +36,25 @@ int main() {
     tx.push_back(new Ttx);
     tx.push_back(new Triangle);
     std::vector<F_base*> fbase;
-    fbase.push_back(new Py(20,20));
-    fbase.push_back(new Sf(1.2,1));
+    fbase.push_back(new Py(3,3));
+    fbase.push_back(new Py(-3,-3));
+    fbase.push_back(new Sf(0.7,1));
+    fbase.push_back(new Sf(1,0.7));
     fbase.push_back(new Jy());
     fbase.push_back(new Jx());
-    fbase.push_back(new Fs(-45,1.1));
-    fbase.push_back(new Fs(-45,1.1));
+    fbase.push_back(new Fs(-20,0.6));
+    fbase.push_back(new Fs(20,0.6));
 
     std::vector<Point> pp = {Point(75,75),Point(225,75),Point(225,225),Point(75,225),Point(150,75),Point(150,225)};
     std::vector<Scalar> scalar;
     for(int i = 0;i < 4;i++){
         scalar.push_back(Scalar(125 + 35 * i));
     }
-    std::thread t(print_sj,std::ref(tx),std::ref(pp),std::ref(scalar),std::ref(fbase));
-//    print_sj(tx,pp,scalar,fbase);
-    print_zh(tx,pp,scalar,fbase);
-    t.join();
-
+//    std::thread t(print_sj,std::ref(tx),std::ref(pp),std::ref(scalar),std::ref(fbase));
+////    print_sj(tx,pp,scalar,fbase);
+//    print_zh(tx,pp,scalar,fbase);
+//    t.join();
+    print_all(tx,pp,scalar,fbase);
 //    waitKey();
    for(auto tmp : tx)
         delete  tmp;
@@ -104,7 +108,7 @@ void print_sj(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std:
         init = 0;
         counter.clear();
         std::string ouputname = "D:\\pic\\out2\\" + std::to_string(n + 1) + ".jpg"; //outpu 路径
-        Mat fs_mat = fsbh(pic,fbase);
+        Mat fs_mat = fsbh(pic,fbase,n);
         bq.push_mat(fs_mat);  //标签： 仿射矩阵
         gaussnoise(pic);  //高斯噪声
         imwrite(ouputname, pic);
@@ -146,7 +150,7 @@ void print_zh(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std:
         init = 0;
         counter.clear();
         std::string ouputname = "D:\\pic\\out3\\" + std::to_string(n + 1) + ".jpg"; //outpu 路径
-        Mat fs_mat = fsbh(pic,fbase);
+        Mat fs_mat = fsbh(pic,fbase,n);
         bq.push_mat(fs_mat);  //标签： 仿射矩阵
         gaussnoise(pic);  //高斯噪声
         imwrite(ouputname, pic);
@@ -155,4 +159,56 @@ void print_zh(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std:
         bq.clearall();
     }
     outfile.close();
+}
+void print_all(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase){
+    Mat  pic = Mat(300,300,CV_8UC1,Scalar(0));
+    std::ofstream  outfile;
+    std::vector<Point> point_tmp = {Point(75,75),Point(223,75),Point(75,220),Point(223,140 + 73),Point(150,173),Point(159,254),Point(125,280),Point(150,198)};
+    std::vector<Scalar>  vectorscalar;
+    for(int i = 0;i < tx.size();i++){
+        vectorscalar.push_back(Scalar(125 + 15 * i));
+    }
+    outfile.open("out_3.txt");
+    Bq bq;
+    for(int i = 0;i < tx.size();i++){
+        tx[i]->show(pic,point_tmp[i],vectorscalar[i]);
+    }
+    imwrite("print_all.jpg", pic);
+    waitKey();
+
+
+//    int index(0);
+//    int init(0);
+//    std::set<int> counter;
+//    for(int i = 0;i < tx.size();i++){
+//        tx[index]->show(pic,point_tmp[i],vectorscalar[i]);
+//    }
+//    for(int n = 0;n < N;n++) {
+//        Mat  pic = Mat(300,300,CV_8UC1,Scalar(0));
+//        bq.bq["nb"].push_back(n + 1);  //标签：number
+//        point_tmp = pp;
+//        for (int i = 0; i < 4; i++) {
+//
+//            while (counter.find(index = output_sj(0, 7)) != counter.end()) {
+//            }
+//            tx[index]->show_py(pic, point_tmp[i], scalar[init++]);
+//            counter.insert(index);
+//            bq.bq["xh"].push_back(index + 1); //标签： xh
+//            bq.bq["hd"].push_back(scalar[init - 1].val[0]);
+//            bq.bq["center"].push_back(point_tmp[i].x);
+//            bq.bq["center"].push_back(point_tmp[i].y);
+//        }
+//
+//        init = 0;
+//        counter.clear();
+//        std::string ouputname = "D:\\pic\\out3\\" + std::to_string(n + 1) + ".jpg"; //outpu 路径
+//        Mat fs_mat = fsbh(pic,fbase);
+//        bq.push_mat(fs_mat);  //标签： 仿射矩阵
+//        gaussnoise(pic);  //高斯噪声
+//        imwrite(ouputname, pic);
+//        bq.convert_mat(fs_mat);//转换center根据仿射矩阵
+//        outfile << bq;
+//        bq.clearall();
+//    }
+//    outfile.close();
 }
