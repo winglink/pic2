@@ -11,13 +11,18 @@
 #include <unordered_map>
 using namespace  cv;
 const double PI = std::atan(1.0) * 4;
+int  output_sj(int low,int up){
+    srand((unsigned )time(NULL));
+    int result = rand() % (up - low + 1) + low;
+    return result;
+}
 class Tx{
 public:
     virtual void show(Mat &mat, const Point &center, const Scalar &scalar) = 0;
-    virtual void show_py(Mat &mat,const Point &center,const Scalar &scalar) = 0;
+    virtual void show_py(Mat &mat, Point &center, const Scalar &scalar) = 0;
 
-protected:
-    std::vector<Point> input;
+//protected:
+//    std::vector<Point> input;
 };
 
 class Triangle : public Tx{
@@ -25,7 +30,8 @@ public:
     Triangle(int ll) : ll(ll) {}
     Triangle() {}
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        std::vector<Point> input;
         input.push_back(Point(center.x,center.y - ll));
         input.push_back(Point(center.x - ll * cos(30.0 / 180.0 * PI),center.y + ll * sin(30.0 / 180.0 * PI)));
         input.push_back(Point(center.x + ll * cos(30.0 / 180.0 * PI),center.y + ll * sin(30.0 / 180.0 * PI)));
@@ -40,11 +46,12 @@ public:
 //        }
 //    polylines(pic, input, true, scalar[i], -1, LINE_8, 0);
         std::for_each(input.begin(),input.end(),[py](Point &p){ p.y = p.y + py; });
+        center.y += py;
         fillConvexPoly(mat,input,scalar,LINE_8,0);
-        input.clear();
     }
 
     void show(Mat &mat, const Point &center, const Scalar &scalar) override {
+        std::vector<Point> input;
         input.push_back(Point(center.x,center.y - ll));
         input.push_back(Point(center.x - ll * cos(30.0 / 180.0 * PI),center.y + ll * sin(30.0 / 180.0 * PI)));
         input.push_back(Point(center.x + ll * cos(30.0 / 180.0 * PI),center.y + ll * sin(30.0 / 180.0 * PI)));
@@ -54,7 +61,7 @@ public:
 //        }
 //    polylines(pic, input, true, scalar[i], -1, LINE_8, 0);
         fillConvexPoly(mat,input,scalar,LINE_8,0);
-        input.clear();
+
     }
 
 private:
@@ -70,8 +77,14 @@ public:
         rectangle(mat,Point(center.x - ll, center.y - ll),Point(center.x + ll,center.y + ll),scalar,-1);
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
-        rectangle(mat,Point(center.x - ll, center.y - ll),Point(center.x + ll,center.y + ll),scalar,-1);
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        int py(0);
+        if(center.y >= 150)
+            py = -(center.y - ll - 150);
+        else
+            py = 150 - center.y - ll;
+        rectangle(mat,Point(center.x - ll, center.y - ll + py ),Point(center.x + ll,center.y + ll + py),scalar,-1);
+        center.y += py;
     }
 
 private:
@@ -85,6 +98,7 @@ public:
     Wbx() {}
 
     void show(Mat &mat, const Point &center, const Scalar &scalar) override {
+        std::vector<Point> input;
         input.push_back(Point(center.x,center.y - r));
         input.push_back(Point(center.x + r * sin(angle),center.y - r * cos(angle)));
         input.push_back(Point(center.x + r * sin(angle / 2),center.y + r * cos(angle / 2)));
@@ -95,10 +109,11 @@ public:
 //            std::cout << point.x << " " << point.y << std::endl;
 //        }
         fillConvexPoly(mat,input,scalar,LINE_8,0);
-        input.clear();
+
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        std::vector<Point> input;
         input.push_back(Point(center.x,center.y - r));
         input.push_back(Point(center.x + r * sin(angle),center.y - r * cos(angle)));
         input.push_back(Point(center.x + r * sin(angle / 2),center.y + r * cos(angle / 2)));
@@ -116,7 +131,8 @@ public:
 //            std::cout << point.x << " " << point.y << std::endl;
 //        }
         fillConvexPoly(mat,input,scalar,LINE_8,0);
-        input.clear();
+        center.y += py;
+
     }
 
 private:
@@ -130,6 +146,7 @@ public:
     Ttx(){}
 
     void show(Mat &mat, const Point &center, const Scalar &scalar) override {
+        std::vector<Point> input;
         int tt = (a + 2 * b) * h / (3.0 * (a + b));
         input.push_back(Point(center.x - a / 2.0,center.y - tt));
         input.push_back(Point(center.x + a / 2.0,center.y - tt));
@@ -140,10 +157,11 @@ public:
 //            std::cout << point.x << " " << point.y << std::endl;
 //        }
         fillConvexPoly(mat,input,scalar,LINE_8,0);
-        input.clear();
+
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        std::vector<Point> input;
         int tt = (a + 2 * b) * h / (3.0 * (a + b));
         input.push_back(Point(center.x - a / 2.0,center.y - tt));
         input.push_back(Point(center.x + a / 2.0,center.y - tt));
@@ -161,7 +179,8 @@ public:
 //            std::cout << point.x << " " << point.y << std::endl;
 //        }
         fillConvexPoly(mat,input,scalar,LINE_8,0);
-        input.clear();
+        center.y += py;
+
     }
 
 private:
@@ -179,7 +198,7 @@ public:
         circle(mat,center1,r,scalar,-1,LINE_8);
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
         int py(0);
         if(center.y >= 150)
             py = 150 - center.y + r ;
@@ -187,6 +206,7 @@ public:
             py = 150 - center.y - r;
         Point center1(center.x,center.y + py);
         circle(mat,center1,r,scalar,-1,LINE_8);
+        center.y += py;
 
     }
 
@@ -203,8 +223,15 @@ public:
         ellipse(mat,center2,Size(r,r),0,initan,endan,scalar,-1);
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
-
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        int py(0);
+        if(center.y >= 150)
+            py = 150 - (center.y + 4 * r / (3 * PI))  + r;
+        else
+            py = 150 - (center.y + 4 * r / (3 * PI)) ;
+        Point center2(center.x,center.y + 4 * r / (3 * PI) + py);
+        ellipse(mat,center2,Size(r,r),0,initan,endan,scalar,-1);
+        center.y += py;
     }
 
 
@@ -225,7 +252,15 @@ public:
 
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        int py(0);
+        if(center.y >= 150)
+            py = 150 - (center.y + 4 * r / (3 * PI))  + r;
+        else
+            py = 150 - (center.y + 4 * r / (3 * PI)) ;
+        Point center2(center.x,center.y + 4 * r / (3 * PI) + py);
+        ellipse(mat,center2,Size(r,r),0,initan,endan,scalar,-1);
+        center.y += py;
 
     }
 
@@ -266,8 +301,38 @@ public:
         fillPoly(mat,result,scalar);
     }
 
-    void show_py(Mat &mat, const Point &center, const Scalar &scalar) override {
+    void show_py(Mat &mat, Point &center, const Scalar &scalar) override {
+        std::vector<Point> input1;
+        std::vector<Point> input2;
+        Point tmp;
+        for(int i = 0;i < 5;i++){
+            tmp.x = center.x + cos((18 + 72 * i) / 180.0 * PI) * R;
+            tmp.y = center.y - sin((18 + 72 * i) / 180.0 * PI) * R;
+            input1.push_back(tmp);
+        }
 
+        for(int i = 0;i < 5;i++){
+            tmp.x = center.x + cos((54+ 72 * i) / 180.0 * PI) * r;
+            tmp.y = center.y - sin((54+ 72 * i) / 180.0 * PI) * r;
+            input2.push_back(tmp);
+        }
+        auto start = input2.begin();
+        for(auto init = input1.begin(); init != input1.end();init++){
+            start = input2.insert(start,(*init));
+            start++;
+            if( (start + 1) != input2.end())
+                start++;
+        }
+        int py(0);
+        if(center.y >= 150)
+            py = 150 - input2[2].y  ;
+        else
+            py = 150 - input2[6].y ;
+        std::for_each(input2.begin(),input2.end(),[py](Point &p){ p.y = p.y + py;});
+        std::vector<std::vector<Point>> result;
+        result.push_back(input2);
+        fillPoly(mat,result,scalar);
+        center.y += py;
     }
 
 private:
@@ -284,6 +349,8 @@ public:
     Fs() {}
     Fs(int angle, double scale) : angle(angle), scale(scale) {}
     Mat bh(Mat &mat) override {  //旋转 缩放
+        angle = output_sj(0,360);
+        scale = output_sj(8,12) / 10.0;
         Mat result;
         Mat m(2,3,CV_32FC1);
         Point2f center(mat.cols / 2,mat.rows / 2);
@@ -303,6 +370,8 @@ public:
     Py(int px, int py) : px(px), py(py) {}
 
     Mat bh(Mat &mat) override {
+        px = output_sj(-20,20);
+        py = output_sj(-20,20);
         Mat m = (Mat_<double>(2,3) << 1,0,px,0,1,py );
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
@@ -310,8 +379,8 @@ public:
         return m;
     }
 private:
-    int px = 20;
-    int py = 20;
+    int px = 0;
+    int py = 0;
 };
 class Sf : public F_base{ //缩放
 public:
@@ -319,6 +388,9 @@ public:
     Sf(double fx, double fy) : fx(fx), fy(fy) {}
 
     Mat bh(Mat &mat) override {
+        fx = output_sj(8,12) / 10.0;
+        fy = output_sj(8,12) / 10.0;
+
         Mat m = (Mat_<double>(2,3) << fx,0,0,0,fy,0 );
         Mat result;
         warpAffine(mat,result,m,Size(mat.cols,mat.rows));
