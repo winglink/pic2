@@ -105,7 +105,6 @@ public:
         input.push_back(Point(center.x - r * sin(angle / 2),center.y + r * cos(angle / 2)));
         input.push_back(Point(center.x - r * sin(angle),center.y - r * cos(angle)));
 
-        std::cout << "---" << input[2] << std::endl;
 //        for(auto point : input){
 //            std::cout << point.x << " " << point.y << std::endl;
 //        }
@@ -299,7 +298,6 @@ public:
         }
         std::vector<std::vector<Point>> result;
         result.push_back(input2);
-        std::cout << "***" << input2[6] << std::endl;
         fillPoly(mat,result,scalar);
     }
 
@@ -351,8 +349,8 @@ public:
     Fs() {}
     Fs(int angle, double scale) : angle(angle), scale(scale) {}
     Mat bh(Mat &mat) override {  //旋转 缩放
-        angle = output_sj(0,360);
-        scale = output_sj(8,12) / 10.0;
+//        angle = output_sj(0,360);
+//        scale = output_sj(8,12) / 10.0;
         Mat result;
         Mat m(2,3,CV_32FC1);
         Point2f center(mat.cols / 2,mat.rows / 2);
