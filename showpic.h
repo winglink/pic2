@@ -9,6 +9,9 @@
 #include <vector>
 #include <iostream>
 #include <unordered_map>
+
+const int PY = 10;
+
 using namespace  cv;
 const double PI = std::atan(1.0) * 4;
 int  output_sj(int low,int up){
@@ -476,9 +479,9 @@ public:
             std::vector<float> vectorfloat;
             std::vector<float> re;
         for(auto init = bq["center"].begin();init != bq["center"].end();init++){
-                    int x = *init;
+                    int x = *init + PY;
                     init++;
-                    int y = *init;
+                    int y = *init + PY;
                     Mat tmp = (Mat_<double>(3,1) << x,y,1);
 //                    std::cout << "--"<< std::endl;
 //                    std::cout << tmp<< std::endl;
