@@ -91,7 +91,7 @@ public:
     }
 
 private:
-        int ll = 75; //1/2边长
+        int ll = 45; //1/2边长
 
 };
 
@@ -214,7 +214,7 @@ public:
     }
 
 private:
-        int r = 73;
+        int r = 40;
 };
 class Halfcircle : public Tx{
 public:
