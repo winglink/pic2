@@ -5,10 +5,10 @@
 #include <fstream>
 #include <thread>
 const int N = 10000;
-const std::string out_txt1 = "out_7.txt";
-const std::string out_txt2 = "out_8.txt";
-const std::string out_dri1= "D:\\pic2\\out7\\";
-const std::string out_dri2= "D:\\pic2\\out8\\";
+const std::string out_txt1 = "out_11.txt";
+const std::string out_txt2 = "out_12.txt";
+const std::string out_dri1= "D:\\pic2\\out11\\";
+const std::string out_dri2= "D:\\pic2\\out12\\";
 void print_zh(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
 void print_sj(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
 void print_all(const std::vector<Tx*> &tx,const std::vector<Point> &pp,const std::vector<Scalar> &scalar,const std::vector<F_base*> &fbase);
